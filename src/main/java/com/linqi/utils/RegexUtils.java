@@ -3,7 +3,7 @@ package com.linqi.utils;
 import cn.hutool.core.util.StrUtil;
 
 /**
- * @author 虎哥
+ * @author LinQi
  */
 public class RegexUtils {
     /**

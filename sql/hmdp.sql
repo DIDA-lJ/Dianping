@@ -13,7 +13,7 @@
 
  Date: 14/03/2022 21:38:11
 */
-create database dianping;
+create database if not exists dianping;
 use dianping;
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
