@@ -1,6 +1,7 @@
 package com.linqi.utils;
 
 import com.linqi.dto.UserDTO;
+import com.linqi.entity.User;
 
 public class UserHolder {
     private static final ThreadLocal<UserDTO> tl = new ThreadLocal<>();
