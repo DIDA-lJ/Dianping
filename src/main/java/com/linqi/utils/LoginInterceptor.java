@@ -1,6 +1,7 @@
 package com.linqi.utils;
 
 import com.linqi.dto.UserDTO;
+import com.linqi.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;

@@ -1,14 +1,17 @@
 package com.linqi.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.linqi.dto.LoginFormDTO;
 import com.linqi.dto.Result;
+import com.linqi.dto.UserDTO;
 import com.linqi.entity.User;
 import com.linqi.mapper.UserMapper;
 import com.linqi.service.IUserService;
 import com.linqi.utils.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
@@ -58,6 +61,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
         // 4.一致，根据手机号查询用户
         User user = query().eq("phone",phone).one();
+
         // 5.判断用户是否存在
         if(user == null){
             // 6.不存在，创建用户并保存
@@ -65,7 +69,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
 
         // 7.保存用户信息到 session 中
-        session.setAttribute("user",user);
+        session.setAttribute("user", BeanUtil.copyProperties(user, UserDTO.class));
         return Result.ok();
     }
 
