@@ -26,7 +26,7 @@ import static com.linqi.utils.SystemConstants.USER_NICK_NAME_PREFIX;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
     @Override
-    public Result sendCode(String phone, HttpSession session) {
+    public Result  sendCode(String phone, HttpSession session) {
         // 1. 校验手机号
         if(RegexUtils.isPhoneInvalid(phone)){
             // 2. 如果不符合，返回错误信息
