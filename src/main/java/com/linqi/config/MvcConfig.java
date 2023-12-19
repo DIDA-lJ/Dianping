@@ -1,6 +1,7 @@
 package com.linqi.config;
 
 import com.linqi.interceptors.LoginInterceptor;
+import com.linqi.interceptors.RefreshTokenInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -16,20 +17,22 @@ import javax.annotation.Resource;
 
 @Configuration
 public class MvcConfig implements WebMvcConfigurer {
+
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoginInterceptor(stringRedisTemplate))
+        registry.addInterceptor(new LoginInterceptor())
                 .excludePathPatterns(
-                        "/shop/**",
-                        "/voucher/**",
-                        "/shop-type",
-                        "/upload/**",
                         "/blog/hot",
+                        "/voucher/**",
+                        "/upload/**",
+                        "/shop/**",
+                        "/shop-type/**",
                         "/user/code",
                         "/user/login"
-                );
-
+                ).order(1);
+        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate)).addPathPatterns("/**").order(0);
     }
 }
