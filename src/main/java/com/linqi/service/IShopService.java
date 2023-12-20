@@ -1,5 +1,6 @@
 package com.linqi.service;
 
+import com.linqi.dto.Result;
 import com.linqi.entity.Shop;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -12,4 +13,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IShopService extends IService<Shop> {
 
+    Result queryById(Long id);
 }
