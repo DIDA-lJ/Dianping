@@ -1,5 +1,9 @@
 package com.linqi.constants;
 
+/**
+ * @description 缓存常量类
+ * @author Linqi
+ */
 public class RedisConstants {
     public static final String LOGIN_CODE_KEY = "login:code:";
     public static final Long LOGIN_CODE_TTL = 5L;
