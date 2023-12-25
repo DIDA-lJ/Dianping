@@ -1,10 +1,8 @@
 package com.linqi.utils;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 
-import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -15,7 +13,7 @@ import java.time.format.DateTimeFormatter;
  * @description
  */
 @Component
-public class RedisWorker {
+ public class RedisIdWorker {
     /**
      * 1. 初始时间序列号
      */
@@ -27,7 +25,7 @@ public class RedisWorker {
 
     private StringRedisTemplate stringRedisTemplate;
 
-    public RedisWorker(StringRedisTemplate stringRedisTemplate) {
+    public RedisIdWorker(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
     }
 
