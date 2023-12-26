@@ -1,5 +1,6 @@
 package com.linqi.service;
 
+import com.linqi.dto.Result;
 import com.linqi.entity.VoucherOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -12,4 +13,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IVoucherOrderService extends IService<VoucherOrder> {
 
+    Result seckillVoucher(Long voucherId);
 }
