@@ -49,11 +49,16 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
             return Result.fail("库存不足！");
         }
 
+        return createVoucherOrder(voucherId);
+    }
+
+    @Transactional
+    public synchronized Result createVoucherOrder(Long voucherId) {
         // 5.一人一单
         Long userId = UserHolder.getUser().getId();
-        Long count = query().eq("user_id",userId).eq("voucher_id",voucherId).count();
+        Long count = query().eq("user_id", userId).eq("voucher_id", voucherId).count();
 
-        if(count > 0){
+        if (count > 0) {
             return Result.fail("用户已经购买过一次了！");
         }
 
