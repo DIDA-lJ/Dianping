@@ -9,6 +9,7 @@ import com.linqi.service.IVoucherOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.linqi.utils.RedisIdWorker;
 import com.linqi.utils.UserHolder;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,13 +50,21 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
             return Result.fail("库存不足！");
         }
 
-        return createVoucherOrder(voucherId);
+        // 5.一人一单
+        Long userId = UserHolder.getUser().getId();
+        synchronized (userId.toString().intern()) {
+            // 获取代理对象（事务）
+            IVoucherOrderService proxy = (IVoucherOrderService) AopContext.currentProxy();
+            return proxy.createVoucherOrder(voucherId);
+        }
+
     }
 
     @Transactional
-    public synchronized Result createVoucherOrder(Long voucherId) {
-        // 5.一人一单
+    @Override
+    public Result createVoucherOrder(Long voucherId) {
         Long userId = UserHolder.getUser().getId();
+
         Long count = query().eq("user_id", userId).eq("voucher_id", voucherId).count();
 
         if (count > 0) {
@@ -63,11 +72,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         }
 
         // 6.扣减库存
-        boolean success = seckillVoucherService.update()
-                .setSql("stock = stock - 1")
-                .eq("voucher_id", voucherId).
-                gt("stock", 0).
-                update();
+        boolean success = seckillVoucherService.update().setSql("stock = stock - 1").eq("voucher_id", voucherId).gt("stock", 0).update();
         // 7.判断库存是否扣减成功,扣减失败，返回库存为空的信息
         if (!success) {
             return Result.fail("库存不足！");
@@ -91,5 +96,6 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
 
         // 9.返回订单信息
         return Result.ok(orderId);
+
     }
 }
