@@ -48,31 +48,25 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         SECKILL_SCRIPT.setResultType(Long.class);
     }
     @Override
-    public Result seckillVoucher(Long voucherId){
-        // 获取用户
+    public Result seckillVoucher(Long voucherId) {
         Long userId = UserHolder.getUser().getId();
-        
-        // 1.执行 lua 脚本
+        long orderId = redisIdWorker.nextId("order");
+        // 1.执行lua脚本
         Long result = stringRedisTemplate.execute(
                 SECKILL_SCRIPT,
                 Collections.emptyList(),
-                voucherId.toString(),userId.toString()
+                voucherId.toString(), userId.toString(), String.valueOf(orderId)
         );
-        int flag = result.intValue();
-
-        // 2.判断结果是否是 0
-        if(flag != 0){
-            // 2.1 不为 0 ,代表没有购买资格
-            return Result.fail(flag == 1? "库存不足" : "不能重复下单");
+        int r = result.intValue();
+        // 2.判断结果是否为0
+        if (r != 0) {
+            // 2.1.不为0 ，代表没有购买资格
+            return Result.fail(r == 1 ? "库存不足" : "不能重复下单");
         }
-
-        // 2.2 为 0,有购买资格
-        long resultId = redisIdWorker.nextId("order");
-        // TODO 保存到阻塞队列
-
-        // 3.返回订单 id
-        return Result.ok(resultId);
+        // 3.返回订单id
+        return Result.ok(orderId);
     }
+
 
 
 //    @Override
