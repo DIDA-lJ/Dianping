@@ -3,7 +3,7 @@ package com.linqi.controller;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import com.linqi.dto.Result;
-import com.linqi.utils.SystemConstants;
+import com.linqi.constants.SystemConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

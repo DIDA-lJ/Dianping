@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.linqi.dto.Result;
 import com.linqi.entity.Shop;
 import com.linqi.service.IShopService;
-import com.linqi.utils.SystemConstants;
+import com.linqi.constants.SystemConstants;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;

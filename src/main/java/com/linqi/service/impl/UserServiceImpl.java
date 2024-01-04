@@ -13,7 +13,6 @@ import com.linqi.mapper.UserMapper;
 import com.linqi.service.IUserService;
 import com.linqi.utils.RegexUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.linqi.constants.RedisConstants.*;
-import static com.linqi.utils.SystemConstants.USER_NICK_NAME_PREFIX;
+import static com.linqi.constants.SystemConstants.USER_NICK_NAME_PREFIX;
 
 /**
  * <p>
