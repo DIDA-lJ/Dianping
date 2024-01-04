@@ -8,7 +8,7 @@ import com.linqi.entity.Blog;
 import com.linqi.entity.User;
 import com.linqi.service.IBlogService;
 import com.linqi.service.IUserService;
-import com.linqi.utils.SystemConstants;
+import com.linqi.constants.SystemConstants;
 import com.linqi.utils.UserHolder;
 import org.springframework.web.bind.annotation.*;
 
