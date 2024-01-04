@@ -38,3 +38,6 @@
 6. 对于热点店铺，使用逻辑过期的机制解决缓存击穿问题，防止数据库宕机；
 7. 使用 Redis 自增的方式实现全局 ID 生成器；
    
+## 压测结果
+### 优惠券秒杀功能（Redis stream 消息队列实现）
+![image](https://github.com/DIDA-lJ/Dianping/assets/97254796/baf48118-544d-4e37-97cd-2112e84d16a6)
