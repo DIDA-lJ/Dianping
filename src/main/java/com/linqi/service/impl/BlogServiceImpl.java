@@ -47,6 +47,12 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         return Result.ok(records);
     }
 
+    @Override
+    public Result likeBlog(Long id) {
+        //1.获取登录
+        return null;
+    }
+
     private void queryBlogUser(Blog blog) {
         Long userId = blog.getUserId();
         User user = userService.getById(userId);
