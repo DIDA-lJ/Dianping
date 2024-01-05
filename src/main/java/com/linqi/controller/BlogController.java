@@ -5,9 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.linqi.dto.Result;
 import com.linqi.dto.UserDTO;
 import com.linqi.entity.Blog;
-import com.linqi.entity.User;
 import com.linqi.service.IBlogService;
-import com.linqi.service.IUserService;
 import com.linqi.constants.SystemConstants;
 import com.linqi.utils.UserHolder;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +18,7 @@ import java.util.List;
  * 前端控制器
  * </p>
  *
+ * @author Linqi
 
  */
 @RestController
