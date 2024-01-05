@@ -1,5 +1,6 @@
 package com.linqi.service;
 
+import com.linqi.dto.Result;
 import com.linqi.entity.Blog;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -12,4 +13,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IBlogService extends IService<Blog> {
 
+    Result queryBlogById(Long id);
+
+    Result queryHotBlog(Integer current);
 }
