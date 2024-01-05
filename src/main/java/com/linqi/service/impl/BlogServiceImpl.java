@@ -95,7 +95,9 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
             //4.如果已经点赞，则取消点赞
             //4.1 数据库点赞数 - 1
             boolean isSuccess = update().setSql("liked = liked - 1").eq("id",id).update();
-            stringRedisTemplate.opsForSet().remove(key, String.valueOf(userId));
+            if (isSuccess) {
+                stringRedisTemplate.opsForSet().remove(key, String.valueOf(userId));
+            }
         }
 
         return Result.ok();
