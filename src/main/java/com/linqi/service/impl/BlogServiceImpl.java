@@ -1,6 +1,7 @@
 package com.linqi.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.linqi.constants.SystemConstants;
 import com.linqi.dto.Result;
@@ -121,8 +122,10 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         }
         // 2.解析出其中的用户 id
         List<Long> ids = top5.stream().map(Long::valueOf).collect(Collectors.toList());
-        // 3.根据用户 id 查询用户信息
-        List<UserDTO> userDTOS = userService.listByIds(ids)
+        String idStr = StrUtil.join(",", ids);
+        // 3.根据用户 id 查询用户信息 ORDER BY FIELD(id, 5, 1)
+        List<UserDTO> userDTOS = userService.query()
+                .in("id", ids).last("ORDER BY FIELD(id," + idStr + ")").list()
                 .stream()
                 .map(user -> BeanUtil.copyProperties(user, UserDTO.class))
                 .collect(Collectors.toList());
