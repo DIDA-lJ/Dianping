@@ -125,6 +125,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
             }
         }
     }
+    @Override
     public void createVoucherOrder(VoucherOrder voucherOrder) {
         Long userId = voucherOrder.getUserId();
         Long voucherId = voucherOrder.getVoucherId();
@@ -141,7 +142,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
 
         try {
             // 5.1.查询订单
-            Long count = query().eq("user_id", userId).eq("voucher_id", voucherId).count();
+            int count = query().eq("user_id", userId).eq("voucher_id", voucherId).count();
             // 5.2.判断是否存在
             if (count > 0) {
                 // 用户已经购买过了
