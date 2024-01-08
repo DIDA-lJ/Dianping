@@ -7,6 +7,7 @@ import com.linqi.constants.SystemConstants;
 import com.linqi.dto.Result;
 import com.linqi.dto.UserDTO;
 import com.linqi.entity.Blog;
+import com.linqi.entity.Follow;
 import com.linqi.entity.User;
 import com.linqi.mapper.BlogMapper;
 import com.linqi.service.IBlogService;
@@ -23,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.linqi.constants.RedisConstants.BLOG_LIKED_KEY;
+import static com.linqi.constants.RedisConstants.FEED_KEY;
 
 /**
  * <p>
@@ -39,6 +41,9 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private FollowServiceImpl followService;
 
     @Override
     public Result queryHotBlog(Integer current) {
@@ -117,25 +122,44 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         String key = BLOG_LIKED_KEY + id;
         // 1.查询 top 5 的点赞用户 range key 0 4
         Set<String> top5 = stringRedisTemplate.opsForZSet().range(key, 0, 4);
-        if (top5.size() == 0 || top5 == null || top5.isEmpty()){
+        if ( top5 == null || top5.isEmpty()){
             return Result.ok(Collections.emptyList());
         }
         // 2.解析出其中的用户 id
         List<Long> ids = top5.stream().map(Long::valueOf).collect(Collectors.toList());
         String idStr = StrUtil.join(",", ids);
         // 3.根据用户 id 查询用户信息 ORDER BY FIELD(id, 5, 1)
-        List<UserDTO> userDTOS = userService.query()
+        List<UserDTO> userDtos = userService.query()
                 .in("id", ids).last("ORDER BY FIELD(id," + idStr + ")").list()
                 .stream()
                 .map(user -> BeanUtil.copyProperties(user, UserDTO.class))
                 .collect(Collectors.toList());
         // 4.返回
-        return Result.ok(userDTOS);
+        return Result.ok(userDtos);
     }
 
     @Override
     public Result saveBlog(Blog blog) {
-        return null;
+        //1.获取登录用户
+        UserDTO user = UserHolder.getUser();
+        blog.setUserId(user.getId());
+        //2.保存探店笔记
+        boolean isSuccess = save(blog);
+        if(!isSuccess){
+            return Result.fail("新增笔记失败！");
+        }
+        //3.查询笔记作者的所有粉丝 select * from tb_follow where follow_user_id = ?
+        List<Follow> follows = followService.query().eq("follow_user_id",user.getId()).list();
+        // 4.推送笔记 id 给所有粉丝
+        for(Follow follow : follows){
+            //4.1 获取所有粉丝的 id
+            Long userId = follow.getUserId();
+            //4.2 推送
+            String key = FEED_KEY + userId;
+            stringRedisTemplate.opsForZSet().add(key,blog.getId().toString(),System.currentTimeMillis());
+        }
+
+        return  Result.ok(blog.getId());
     }
 
     @Override
