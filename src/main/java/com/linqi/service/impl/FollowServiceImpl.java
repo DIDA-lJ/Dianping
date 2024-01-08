@@ -1,7 +1,9 @@
 package com.linqi.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.linqi.dto.Result;
+import com.linqi.dto.UserDTO;
 import com.linqi.entity.Follow;
 import com.linqi.mapper.FollowMapper;
 import com.linqi.service.IFollowService;
@@ -13,14 +15,18 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static com.linqi.constants.RedisConstants.FOLLOW_KEY;
 
 /**
  * <p>
  *  服务实现类
  * </p>
- *
-
+ * @author linqi
  */
 @Service
 public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> implements IFollowService {
@@ -73,6 +79,22 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
 
     @Override
     public Result followCommons(Long id) {
-        return null;
+        //1.获取用户 id
+        Long userId = UserHolder.getUser().getId();
+        String key = FOLLOW_KEY + userId;
+        //2.获取查询用户 id
+        String key2 = FOLLOW_KEY + id;
+        Set<String> intersect = stringRedisTemplate.opsForSet().intersect(key,key2);
+        if(intersect.size() == 0 || intersect.isEmpty() || intersect ==null) {
+            return Result.ok(Collections.emptyList());
+        }
+        //3.解析 id 集合
+        List<Long> ids = intersect.stream().map(Long::valueOf).collect(Collectors.toList());
+        //4.查询用户
+        List<UserDTO> users = userService.listByIds(ids)
+                .stream()
+                .map(user -> BeanUtil.copyProperties(user,UserDTO.class))
+                .collect(Collectors.toList());
+        return  Result.ok(users);
     }
 }
