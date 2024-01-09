@@ -45,6 +45,9 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
     @Resource
     private FollowServiceImpl followService;
 
+    @Resource
+    private BlogServiceImpl blogService;
+
     @Override
     public Result queryHotBlog(Integer current) {
         // 根据用户查询
@@ -165,6 +168,18 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
     @Override
     public Result queryBlogOfFollow(Long max, Integer offset) {
         return null;
+    }
+
+    @Override
+    public Result queryMyBlog(Integer current) {
+        // 获取登录用户
+        UserDTO user = UserHolder.getUser();
+        // 根据用户查询
+        Page<Blog> page = blogService.query()
+                .eq("user_id", user.getId()).page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE));
+        // 获取当前页数据
+        List<Blog> records = page.getRecords();
+        return Result.ok(records);
     }
 
     private void queryBlogUser(Blog blog) {
