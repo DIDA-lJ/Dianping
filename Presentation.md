@@ -1,3 +1,4 @@
+## 功能演示
 ### 优惠券秒杀功能（Redis stream 消息队列实现）
 ![image](https://github.com/DIDA-lJ/Dianping/assets/97254796/baf48118-544d-4e37-97cd-2112e84d16a6)
 ### 用户主页笔记展示
