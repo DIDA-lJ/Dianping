@@ -1,5 +1,20 @@
 # Dianping
-基于 SpringBoot + Redis 的店铺点评 APP，实现了找店铺 =>写点评 => 看热评 => 点赞关注=>关注 Feed 流的完整业务流程
+一款基于 Java 开发的店铺点评 APP，实现了找店铺 =>写点评 => 看热评 => 点赞关注=>关注 Feed 流的完整业务流程
+
+## 实现功能
+<ul>
+    <li>店铺查询</li>
+    <li>短信登录</li>
+    <li>优惠券秒杀</li>
+    <li>发布探店笔记</li>
+    <li>查看热点评论</li>
+    <li>点赞关注实现</li>
+    <li>粉丝信息推送(推 Feed 流实现)</li>
+    <li>粉丝信息查询(滚动分页优化)</li>
+    <li>附近商户查询</li>
+    <li>签到功能实现</li>
+    <li>百万数据UV统计</li>
+</ul>
 
 ## 项目架构流程图
 ![image](https://github.com/DIDA-lJ/dianping/assets/97254796/555f583c-5eed-4b4c-8d24-a663cda173f6)
@@ -38,6 +53,14 @@
 6. 对于热点店铺，使用逻辑过期的机制解决缓存击穿问题，防止数据库宕机；
 7. 使用 Redis 自增的方式实现全局 ID 生成器；
    
-## 压测结果
+## 项目部分功能展示
 ### 优惠券秒杀功能（Redis stream 消息队列实现）
 ![image](https://github.com/DIDA-lJ/Dianping/assets/97254796/baf48118-544d-4e37-97cd-2112e84d16a6)
+### 用户主页笔记展示
+![image](https://github.com/DIDA-lJ/Dianping/assets/97254796/20a852ef-a97c-43ce-addb-86b2ed7f9d6e)
+### 首页信息展示
+![image](https://github.com/DIDA-lJ/Dianping/assets/97254796/6f30cc8d-bf0f-44e9-aa7d-3f24aef5f9d3)
+### 共同关注功能实现
+![image](https://github.com/DIDA-lJ/Dianping/assets/97254796/8a7626db-64bf-4eff-92f9-ebe63c13a5fa)
+
+
