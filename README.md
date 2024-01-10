@@ -53,7 +53,7 @@
 6. 对于热点店铺，使用逻辑过期的机制解决缓存击穿问题，防止数据库宕机；
 7. 使用 Redis 自增的方式实现全局 ID 生成器；
    
-## 项目部分功能展示
-
+## 项目功能展示 
+功能演示：<a href="https://github.com/DIDA-lJ/Dianping/blob/main/Presentation.md">功能演示</a>
 
 
