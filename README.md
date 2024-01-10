@@ -1,5 +1,20 @@
 # Dianping
-基于 SpringBoot + Redis 的店铺点评 APP，实现了找店铺 =>写点评 => 看热评 => 点赞关注=>关注 Feed 流的完整业务流程
+一款基于 Java 开发的店铺点评 APP，实现了找店铺 =>写点评 => 看热评 => 点赞关注=>关注 Feed 流的完整业务流程
+
+## 实现功能
+<ul>
+    <li>店铺查询</li>
+    <li>短信登录</li>
+    <li>优惠券秒杀</li>
+    <li>发布探店笔记</li>
+    <li>查看热点评论</li>
+    <li>点赞关注实现</li>
+    <li>粉丝信息推送(推 Feed 流实现)</li>
+    <li>粉丝信息查询(滚动分页优化)</li>
+    <li>附近商户查询</li>
+    <li>签到功能实现</li>
+    <li>百万数据UV统计</li>
+</ul>
 
 ## 项目架构流程图
 ![image](https://github.com/DIDA-lJ/dianping/assets/97254796/555f583c-5eed-4b4c-8d24-a663cda173f6)
