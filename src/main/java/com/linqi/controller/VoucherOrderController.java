@@ -3,7 +3,6 @@ package com.linqi.controller;
 
 import com.linqi.dto.Result;
 import com.linqi.service.IVoucherOrderService;
-import com.linqi.service.impl.VoucherOrderServiceImpl;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

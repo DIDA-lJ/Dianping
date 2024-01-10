@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.linqi.constants.SystemConstants;
 import com.linqi.dto.Result;
+import com.linqi.dto.ScrollResult;
 import com.linqi.dto.UserDTO;
 import com.linqi.entity.Blog;
 import com.linqi.entity.Follow;
@@ -15,12 +16,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.linqi.service.IUserService;
 import com.linqi.utils.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.linqi.constants.RedisConstants.BLOG_LIKED_KEY;
@@ -125,7 +125,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         String key = BLOG_LIKED_KEY + id;
         // 1.查询 top 5 的点赞用户 range key 0 4
         Set<String> top5 = stringRedisTemplate.opsForZSet().range(key, 0, 4);
-        if ( top5 == null || top5.isEmpty()){
+        if (top5 == null || top5.isEmpty()) {
             return Result.ok(Collections.emptyList());
         }
         // 2.解析出其中的用户 id
@@ -148,26 +148,74 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         blog.setUserId(user.getId());
         //2.保存探店笔记
         boolean isSuccess = save(blog);
-        if(!isSuccess){
+        if (!isSuccess) {
             return Result.fail("新增笔记失败！");
         }
         //3.查询笔记作者的所有粉丝 select * from tb_follow where follow_user_id = ?
-        List<Follow> follows = followService.query().eq("follow_user_id",user.getId()).list();
+        List<Follow> follows = followService.query().eq("follow_user_id", user.getId()).list();
         // 4.推送笔记 id 给所有粉丝
-        for(Follow follow : follows){
+        for (Follow follow : follows) {
             //4.1 获取所有粉丝的 id
             Long userId = follow.getUserId();
             //4.2 推送
             String key = FEED_KEY + userId;
-            stringRedisTemplate.opsForZSet().add(key,blog.getId().toString(),System.currentTimeMillis());
+            stringRedisTemplate.opsForZSet().add(key, blog.getId().toString(), System.currentTimeMillis());
         }
 
-        return  Result.ok(blog.getId());
+        return Result.ok(blog.getId());
     }
 
     @Override
     public Result queryBlogOfFollow(Long max, Integer offset) {
-        return null;
+        //1 .获取用户 userID
+        Long userId = UserHolder.getUser().getId();
+
+        //2.查看收件箱 ZREVRANGEBYSCORE key Max Min LIMIT offset count
+        String key = FEED_KEY + userId;
+        Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet()
+                .reverseRangeByScoreWithScores(key, 0, max, offset, 2);
+
+        // 3. 非空判断，防止空指针
+        if (typedTuples == null || typedTuples.isEmpty()) {
+            return Result.ok();
+        }
+
+        //4.解析数据,这里新建一个与 typedTuples 一样大小的数组，节省扩建的时间成本
+        List<Long> ids = new ArrayList<>(typedTuples.size());
+        long minTime = 0;
+        int os = 1;
+        for (ZSetOperations.TypedTuple<String> tuple : typedTuples) {
+            // 4.1 获取 userID
+            ids.add(Long.valueOf(Objects.requireNonNull(tuple.getValue())));
+            // 4.2 获取分数
+            long time = Objects.requireNonNull(tuple.getScore()).longValue();
+            if (time == minTime) {
+                os++;
+            } else {
+                minTime = time;
+                os = 1;
+            }
+        }
+
+        // 5.根据id查询blog
+        String idStr = StrUtil.join(",", ids);
+        List<Blog> blogs = query().in("id", ids).last("ORDER BY FIELD(id," + idStr + ")").list();
+
+
+        for (Blog blog : blogs) {
+            // 5.1.查询blog有关的用户
+            queryBlogUser(blog);
+            // 5.2.查询blog是否被点赞
+            isBlogLiked(blog);
+        }
+
+        // 6.封装并返回
+        ScrollResult result = new ScrollResult();
+        result.setList(blogs);
+        result.setMinTime(minTime);
+        result.setOffset(os);
+
+        return Result.ok(result);
     }
 
     @Override
