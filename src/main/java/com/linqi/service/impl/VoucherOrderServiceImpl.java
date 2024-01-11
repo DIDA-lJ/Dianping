@@ -79,7 +79,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
                     );
                     // 2.判断订单信息是否为空
                     if (list == null || list.isEmpty()) {
-                        // 如果为null，说明没有消息，继续下一次循环
+//                         如果为null，说明没有消息，继续下一次循环
                         continue;
                     }
                     // 解析数据
