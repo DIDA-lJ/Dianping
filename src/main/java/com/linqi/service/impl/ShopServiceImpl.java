@@ -4,29 +4,39 @@ import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.linqi.constants.SystemConstants;
 import com.linqi.dto.Result;
 import com.linqi.entity.Shop;
 import com.linqi.mapper.ShopMapper;
 import com.linqi.service.IShopService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.linqi.utils.RedisData;
+import org.springframework.data.geo.Distance;
+import org.springframework.data.geo.GeoResult;
+import org.springframework.data.geo.GeoResults;
+import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.domain.geo.GeoReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 
 import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.linqi.constants.RedisConstants.*;
+import static java.util.concurrent.Executors.*;
 
 /**
  * <p>
  * 服务实现类
  * </p>
+ *
+ * @author linqi
  */
 @Service
 public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IShopService {
@@ -35,7 +45,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
-    private static final ExecutorService CACHE_REBUILD_EXECUTOR = Executors.newFixedThreadPool(10);
+    private static final ExecutorService CACHE_REBUILD_EXECUTOR = newFixedThreadPool(10);
 
     @Override
     public Result queryById(Long id) {
@@ -43,7 +53,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
 //         Shop shop = queryWithPassThrough(id);
         // 互斥锁解决缓存击穿问题
         Shop shop = queryWithMutex(id);
-        if(id == null){
+        if (id == null) {
             return Result.fail("店铺不存在!");
         }
         return Result.ok(shop);
@@ -52,11 +62,11 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     /**
      * 互斥锁解决缓存击穿问题
      *
-     * @param id
-     * @return
+     * @param id 商户编号
+     * @return 商户信息
      */
     private Shop queryWithMutex(Long id) {
-        Shop shop = null;
+        Shop shop;
 
         // 0. 定义店铺查询缓存
         String key = CACHE_SHOP_KEY + id;
@@ -123,14 +133,14 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         }
 
         // 4.命中，需要先把 Json 反序列化为对象
-        RedisData redisData = JSONUtil.toBean(cache,RedisData.class);
+        RedisData redisData = JSONUtil.toBean(cache, RedisData.class);
         Shop shop = JSONUtil.toBean((JSONObject) redisData.getData(), Shop.class);
         LocalDateTime expireTime = redisData.getExpireTime();
 
         // 5.判断是否过期
-        if(expireTime.isAfter(LocalDateTime.now())){
+        if (expireTime.isAfter(LocalDateTime.now())) {
             // 5.1 未过期，直接返回店铺信息
-            return  shop;
+            return shop;
         }
 
         // 5.2 已过期，需要缓存重建
@@ -139,12 +149,12 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         // 6.1 获取互斥锁
         boolean isLock = tryLock(lockKey);
         // 6.2 判断锁是否获取成功
-        if(isLock){
+        if (isLock) {
             // 6.3 锁获取成功，直接开启独立线程，实现缓存重建
-            CACHE_REBUILD_EXECUTOR.submit(() ->{
+            CACHE_REBUILD_EXECUTOR.submit(() -> {
                 try {
                     // 重建缓存
-                    this.saveShop2Redis(id,20L);
+                    this.saveShop2Redis(id, 20L);
                 } finally {
                     unlock(lockKey);
                 }
@@ -159,7 +169,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
      * 解决缓存穿透代码
      *
      * @param id 店铺 id
-     * @return
+     * @return 店铺信息
      */
 
     public Shop queryWithPassThrough(Long id) {
@@ -205,7 +215,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         stringRedisTemplate.delete(key);
     }
 
-    public void saveShop2Redis(Long id,Long expireSeconds){
+    public void saveShop2Redis(Long id, Long expireSeconds) {
         // 1. 查询店铺数据
         Shop shop = getById(id);
 
@@ -215,7 +225,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         redisData.setExpireTime(LocalDateTime.now().plusSeconds(expireSeconds));
 
         // 3.写入 Redis
-        stringRedisTemplate.opsForValue().set(CACHE_SHOP_KEY + id,JSONUtil.toJsonStr(redisData));
+        stringRedisTemplate.opsForValue().set(CACHE_SHOP_KEY + id, JSONUtil.toJsonStr(redisData));
     }
 
     @Override
@@ -232,5 +242,65 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         // 2. 删除缓存
         stringRedisTemplate.delete(CACHE_SHOP_KEY + id);
         return Result.ok();
+    }
+
+    @Override
+    public Result queryShopByType(Integer typeId, Integer current, Double x, Double y) {
+        // 1.判断是否需要根据坐标查询
+        if (x == null || y == null) {
+            // 不需要坐标查询，按数据库查询，返回默认分页大小
+            Page<Shop> page = query()
+                    .eq("type_id", typeId)
+                    .page(new Page<>(current, SystemConstants.DEFAULT_PAGE_SIZE));
+            // 返回数据
+            return Result.ok(page.getRecords());
+        }
+
+        // 2.计算分页参数
+        int from = (current - 1) * SystemConstants.DEFAULT_PAGE_SIZE;
+        int end = current * SystemConstants.DEFAULT_PAGE_SIZE;
+
+        // 3.查询redis、按照距离排序、分页。结果：shopId、distance
+        String key = SHOP_GEO_KEY + typeId;
+        GeoResults<RedisGeoCommands.GeoLocation<String>> results = stringRedisTemplate.opsForGeo()
+                .search(
+                        // GEOSEARCH key
+                        key,
+                        //   BYLONLAT x y
+                        GeoReference.fromCoordinate(x, y),
+                        // 表示 5 km,5 公里的距离
+                        new Distance(5000),
+                        //  BYRADIUS 10 WITHDISTANCE
+                        RedisGeoCommands.GeoSearchCommandArgs.newGeoSearchArgs().includeDistance().limit(end)
+                );
+        // 非空判断，防止空指针
+        if (results == null) {
+            return Result.ok(Collections.emptyList());
+        }
+        // 4.解析出id
+        List<GeoResult<RedisGeoCommands.GeoLocation<String>>> list = results.getContent();
+        if (list.size() <= from) {
+            // 没有下一页了，结束
+            return Result.ok(Collections.emptyList());
+        }
+        // 4.1.截取 from ~ end的部分
+        List<Long> ids = new ArrayList<>(list.size());
+        Map<String, Distance> distanceMap = new HashMap<>(list.size());
+        list.stream().skip(from).forEach(result -> {
+            // 4.2.获取店铺id
+            String shopIdStr = result.getContent().getName();
+            ids.add(Long.valueOf(shopIdStr));
+            // 4.3.获取距离
+            Distance distance = result.getDistance();
+            distanceMap.put(shopIdStr, distance);
+        });
+        // 5.根据id查询Shop
+        String idStr = StrUtil.join(",", ids);
+        List<Shop> shops = query().in("id", ids).last("ORDER BY FIELD(id," + idStr + ")").list();
+        for (Shop shop : shops) {
+            shop.setDistance(distanceMap.get(shop.getId().toString()).getValue());
+        }
+        // 6.返回
+        return Result.ok(shops);
     }
 }
