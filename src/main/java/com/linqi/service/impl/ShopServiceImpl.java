@@ -62,11 +62,11 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     /**
      * 互斥锁解决缓存击穿问题
      *
-     * @param id
+     * @param id 商户编号
      * @return 商户信息
      */
     private Shop queryWithMutex(Long id) {
-        Shop shop = null;
+        Shop shop;
 
         // 0. 定义店铺查询缓存
         String key = CACHE_SHOP_KEY + id;
@@ -169,7 +169,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
      * 解决缓存穿透代码
      *
      * @param id 店铺 id
-     * @return
+     * @return 店铺信息
      */
 
     public Shop queryWithPassThrough(Long id) {
@@ -268,14 +268,16 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
                         key,
                         //   BYLONLAT x y
                         GeoReference.fromCoordinate(x, y),
-                        //  BYRADIUS 10 WITHDISTANCE
+                        // 表示 5 km,5 公里的距离
                         new Distance(5000),
+                        //  BYRADIUS 10 WITHDISTANCE
                         RedisGeoCommands.GeoSearchCommandArgs.newGeoSearchArgs().includeDistance().limit(end)
                 );
-        // 4.解析出id
+        // 非空判断，防止空指针
         if (results == null) {
             return Result.ok(Collections.emptyList());
         }
+        // 4.解析出id
         List<GeoResult<RedisGeoCommands.GeoLocation<String>>> list = results.getContent();
         if (list.size() <= from) {
             // 没有下一页了，结束
