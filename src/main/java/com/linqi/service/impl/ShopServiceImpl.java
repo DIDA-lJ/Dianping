@@ -26,15 +26,16 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.linqi.constants.RedisConstants.*;
+import static java.util.concurrent.Executors.*;
 
 /**
  * <p>
  * 服务实现类
  * </p>
+ * @author  linqi
  */
 @Service
 public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IShopService {
@@ -43,7 +44,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
-    private static final ExecutorService CACHE_REBUILD_EXECUTOR = Executors.newFixedThreadPool(10);
+    private static final ExecutorService CACHE_REBUILD_EXECUTOR = newFixedThreadPool(10);
 
     @Override
     public Result queryById(Long id) {
@@ -61,7 +62,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
      * 互斥锁解决缓存击穿问题
      *
      * @param id
-     * @return
+     * @return 商户信息
      */
     private Shop queryWithMutex(Long id) {
         Shop shop = null;
