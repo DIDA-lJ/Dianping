@@ -67,7 +67,10 @@ D:.
 13. 随着系统用户增多，使用 Redis HyperLogLog 代替数据库查询，实现店铺和点评的 UV 统计。
 14. 使用哨兵集群来提升 Redis 的读写并发量、可用性和稳定性；
 
-   
+## 项目启动
+后端：更改 数据库 以及 Redis 配置，然后启动main 方法
+前端：启动 nginx.exe 即可，或者到 hmdp 目录下，执行 npm i -g server 命令，然后输入 server 即可
+
 ## 项目功能展示 
 功能演示：<a href="https://github.com/DIDA-lJ/Dianping/blob/main/Presentation.md">功能演示</a>
 
