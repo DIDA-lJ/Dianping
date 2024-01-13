@@ -23,30 +23,27 @@
 
 ```
 D:.
-├─sql 代码数据库文件
-├─src
-│  ├─main
-│  │  ├─java
-│  │  │  └─com
+├─sql                             代码数据库文件
+├─src                             源码
+│  ├─main                         main 包，主要代码文件包
+│  │  ├─java                      java 代码
+│  │  │  └─com                   
 │  │  │      └─linqi
-│  │  │          ├─config
-│  │  │          ├─constants
-│  │  │          ├─controller
-│  │  │          ├─dto
-│  │  │          ├─entity
-│  │  │          ├─interceptors
-│  │  │          ├─mapper
-│  │  │          ├─service
-│  │  │          │  └─impl
+│  │  │          ├─config        配置文件目录，存放项目依赖相关配置
+│  │  │          ├─constants     常量文件目录，存放代码中公共常量
+│  │  │          ├─controller    controller 层，存放 Restful 风格的 API 接口
+│  │  │          ├─dto           dto 目录，存放业务封装类
+│  │  │          ├─entity        项目实体目录，存放和数据库对应的 Java POJO 实体类
+│  │  │          ├─interceptors  拦截器，主要存放两个拦截器，一个是用户登录拦截器和token刷新拦截器
+│  │  │          ├─mapper        mapper 层，主要用于存放操作数据库的代码
+│  │  │          ├─service       Service 层。主要用于存放拉业务逻辑处理代码
+│  │  │          │  └─impl       实现接口，主要实现 Service 层下的接口
 │  │  │          └─utils
-│  │  └─resources
-│  │      ├─data
-│  │      ├─db
-│  │      └─mapper
-   └─test
-      └─java
-          └─com
-              └─linqi
+│  │  └─resources                资源目录
+│  │      ├─data                 数据资源，存放一些过程中需要的数据
+│  │      ├─db                   数据库创建 SQL 
+│  │      └─mapper               存放一些 SQL 语句
+   └─test                        测试目录
 
 
 ```
