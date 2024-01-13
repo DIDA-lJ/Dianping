@@ -123,6 +123,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return Result.ok();
     }
 
+    @Override
+    public Result signCount() {
+        return null;
+    }
+
     private User createUserWithPhone(String phone) {
         // 1.创建用户
         User user = new User();
