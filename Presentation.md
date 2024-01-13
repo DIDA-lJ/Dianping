@@ -7,3 +7,5 @@
 ![image](https://github.com/DIDA-lJ/Dianping/assets/97254796/6f30cc8d-bf0f-44e9-aa7d-3f24aef5f9d3)
 ### 共同关注功能实现
 ![image](https://github.com/DIDA-lJ/Dianping/assets/97254796/8a7626db-64bf-4eff-92f9-ebe63c13a5fa)
+### 连续签到功能实现（后端接口）
+![image](https://github.com/DIDA-lJ/Dianping/assets/97254796/aa290d0c-f1b8-45f9-84ca-22ced3be201b)
